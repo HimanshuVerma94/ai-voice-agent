@@ -11,31 +11,34 @@
   :root { --bg:#f5f2eb; --ink:#14171f; --muted:#5b6070; --card:#ffffff; --line:#e4dfd3; --accent:#3E6AEF; }
   * { box-sizing:border-box; margin:0; padding:0; }
   body { background:var(--bg); color:var(--ink); font-family:Inter,system-ui,sans-serif; line-height:1.5; }
-  .wrap { max-width:960px; margin:0 auto; padding:40px 16px 56px; display:grid; gap:32px; grid-template-columns:1fr; }
-  @media (min-width:860px){ .wrap { grid-template-columns:1fr 420px; align-items:start; padding-top:72px; } }
+  .wrap { max-width:960px; margin:0 auto; padding:24px 16px 40px; display:grid; gap:20px; grid-template-columns:1fr; grid-template-areas:'hero' 'call' 'steps'; }
+  .hero { grid-area:hero; } .steps { grid-area:steps; } .panel { grid-area:call; }
+  @media (min-width:860px){ .wrap { grid-template-columns:1fr 420px; grid-template-areas:'hero call' 'steps call'; align-items:start; gap:8px 40px; padding-top:72px; } #retell { height:560px !important; } }
   .badge { display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:#0a7a3e; background:#e3f5ea; border-radius:999px; padding:6px 12px; }
   .dot { width:8px; height:8px; border-radius:50%; background:#16a34a; animation:p 1.6s infinite; }
   @keyframes p { 50% { opacity:.3; } }
-  h1 { font-size:clamp(30px,5vw,44px); line-height:1.1; letter-spacing:-.02em; margin:16px 0 12px; }
-  .sub { color:var(--muted); font-size:18px; max-width:46ch; }
-  ol { list-style:none; margin-top:28px; display:grid; gap:14px; counter-reset:s; }
+  h1 { font-size:clamp(28px,5vw,44px); line-height:1.1; letter-spacing:-.02em; margin:12px 0 8px; }
+  .sub { color:var(--muted); font-size:17px; max-width:46ch; }
+  ol { list-style:none; margin-top:8px; display:grid; gap:14px; counter-reset:s; }
   li { counter-increment:s; display:grid; grid-template-columns:32px 1fr; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; }
   li::before { content:counter(s); width:32px; height:32px; border-radius:50%; background:var(--ink); color:#fff; display:grid; place-items:center; font-weight:600; font-size:14px; }
   li b { display:block; }
   li span { color:var(--muted); font-size:15px; }
   .tries { margin-top:20px; font-size:15px; color:var(--muted); }
   .tries code { font-family:inherit; background:var(--card); border:1px solid var(--line); border-radius:8px; padding:2px 8px; display:inline-block; margin:4px 4px 0 0; color:var(--ink); }
-  .panel { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:12px; box-shadow:0 10px 30px rgba(20,23,31,.06); }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:8px; box-shadow:0 10px 30px rgba(20,23,31,.06); }
   .note { font-size:13px; color:var(--muted); text-align:center; margin-top:10px; }
-  #retell { width:100%; max-width:420px; height:600px; margin:0 auto; }
+  #retell { width:100%; max-width:420px; height:420px; margin:0 auto; }
 </style>
 </head>
 <body>
 <main class="wrap">
-  <section>
+  <section class="hero">
     <span class="badge"><span class="dot"></span> Live now · 24/7</span>
     <h1>Talk to Sam, a live AI receptionist.</h1>
     <p class="sub">Two minutes. No sign-up. Your browser mic is all you need.</p>
+  </section>
+  <section class="steps">
     <ol>
       <li><div><b>Press the call button</b><span>Allow the microphone when your browser asks.</span></div></li>
       <li><div><b>Tell Sam your business</b><span>Dental clinic, med spa, plumbing, law firm, gym — anything.</span></div></li>
