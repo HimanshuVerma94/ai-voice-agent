@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>SaltWave · AI Setter Demo</title>
+<title>SaltWave · AI Appointment Setter Demo</title>
 <meta name="description" content="A live AI appointment setter demo built for SaltWave Digital.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -31,7 +31,47 @@
   .panel { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:8px; box-shadow:0 10px 30px rgba(20,23,31,.06); }
   .note { font-size:13px; color:var(--muted); text-align:center; margin-top:10px; }
   #retell { width:100%; max-width:420px; height:420px; margin:0 auto; }
+  .ended-box { display:none; padding:48px 24px; text-align:center; }
+  .ended-box b { display:block; font-size:22px; margin-bottom:8px; }
+  .ended-box span { color:var(--muted); font-size:16px; }
+  html.ended #retell, html.ended .panel .note, html.ended .tries { display:none; }
+  html.ended .ended-box { display:block; }
+  html.ended .badge { color:var(--muted); background:var(--line); }
+  html.ended .dot { display:none; }
 </style>
+<script>
+/* Demo limits (Nick, 2026-11-26): open for 7 days, 3 call/chat starts per browser. */
+(function () {
+  var EXPIRES = Date.parse("2026-12-03T00:00:00Z"), KEY = "sam_tries_saltwave-digital", MAX = 3;
+  var MSG_EXPIRED = ["This demo has expired.", "Message me on Upwork and I'll set up a fresh one for you."];
+  var MSG_USED = ["You've used all 3 tries of this demo.", "Message me on Upwork to see it live on your own leads."];
+  function used() { try { return +localStorage.getItem(KEY) || 0; } catch (e) { return 0; } }
+  function bump() { try { localStorage.setItem(KEY, used() + 1); } catch (e) {} }
+  function end(m) {
+    document.documentElement.classList.add("ended");
+    var go = function () {
+      var b = document.getElementById("ended-msg");
+      if (b) b.innerHTML = "<b>" + m[0] + "</b><span>" + m[1] + "</span>";
+      var s = document.querySelector(".badge"); if (s) s.lastChild.textContent = " Demo closed";
+    };
+    document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", go) : go();
+  }
+  var blocked = Date.now() >= EXPIRES ? MSG_EXPIRED : (used() >= MAX ? MSG_USED : null);
+  window.__samOpen = !blocked;
+  if (blocked) { end(blocked); return; }
+  /* Count each new call or chat the widget starts; refuse once the tries are used up. */
+  var realFetch = window.fetch.bind(window);
+  window.fetch = function (input, init) {
+    var url = typeof input === "string" ? input : (input && input.url) || "";
+    if (/create-web-call|\/create-chat(?![-\w])/.test(url)) {
+      if (Date.now() >= EXPIRES) { end(MSG_EXPIRED); return Promise.reject(new Error("demo expired")); }
+      if (used() >= MAX) { end(MSG_USED); return Promise.reject(new Error("demo tries used")); }
+      bump();
+    }
+    return realFetch(input, init);
+  };
+})();
+</script>
 </head>
 <body>
 <main class="wrap">
@@ -59,9 +99,16 @@
       data-title="Sam · SaltWave"
       data-bot-name="Sam"
       data-color="#14171f"></div>
-    <p class="note">Demo only. Prices and details are examples. Calls end after 5 minutes.</p>
+    <div class="ended-box" id="ended-msg"></div>
+    <p class="note">Demo only. Prices and details are examples. Calls end after 3 minutes. Open for 7 days.</p>
   </section>
 </main>
-<script defer src="https://dashboard.retellai.com/retell-widget-embed.js"></script>
+<script>
+  if (window.__samOpen) {
+    var s = document.createElement("script");
+    s.src = "https://dashboard.retellai.com/retell-widget-embed.js";
+    document.body.appendChild(s);
+  }
+</script>
 </body>
 </html>
