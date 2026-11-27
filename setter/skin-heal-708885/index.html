@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Skin & Heal · AI Appointment Setter Demo</title>
+<meta name="description" content="A live AI appointment setter demo built for Skin & Heal.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#f5f2eb; --ink:#14171f; --muted:#5b6070; --card:#ffffff; --line:#e4dfd3; --accent:#3E6AEF; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--ink); font-family:Inter,system-ui,sans-serif; line-height:1.5; }
+  .wrap { max-width:960px; margin:0 auto; padding:24px 16px 40px; display:grid; gap:20px; grid-template-columns:1fr; grid-template-areas:'hero' 'call' 'steps'; }
+  .hero { grid-area:hero; } .steps { grid-area:steps; } .panel { grid-area:call; }
+  @media (min-width:860px){ .wrap { grid-template-columns:1fr 420px; grid-template-areas:'hero call' 'steps call'; align-items:start; gap:8px 40px; padding-top:72px; } #retell { height:560px !important; } }
+  .badge { display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:#0a7a3e; background:#e3f5ea; border-radius:999px; padding:6px 12px; }
+  .dot { width:8px; height:8px; border-radius:50%; background:#16a34a; animation:p 1.6s infinite; }
+  @keyframes p { 50% { opacity:.3; } }
+  .for { font-size:14px; font-weight:600; color:var(--muted); margin-top:14px; }
+  h1 { font-size:clamp(28px,5vw,44px); line-height:1.1; letter-spacing:-.02em; margin:6px 0 8px; }
+  .sub { color:var(--muted); font-size:17px; max-width:48ch; }
+  ol { list-style:none; margin-top:8px; display:grid; gap:14px; counter-reset:s; }
+  li { counter-increment:s; display:grid; grid-template-columns:32px 1fr; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; }
+  li::before { content:counter(s); width:32px; height:32px; border-radius:50%; background:var(--ink); color:#fff; display:grid; place-items:center; font-weight:600; font-size:14px; }
+  li b { display:block; }
+  li span { color:var(--muted); font-size:15px; }
+  .tries { margin-top:20px; font-size:15px; color:var(--muted); }
+  .tries code { font-family:inherit; background:var(--card); border:1px solid var(--line); border-radius:8px; padding:2px 8px; display:inline-block; margin:4px 4px 0 0; color:var(--ink); }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:8px; box-shadow:0 10px 30px rgba(20,23,31,.06); }
+  .note { font-size:13px; color:var(--muted); text-align:center; margin-top:10px; }
+  #retell { width:100%; max-width:420px; height:420px; margin:0 auto; }
+  .ended-box { display:none; padding:48px 24px; text-align:center; }
+  .ended-box b { display:block; font-size:22px; margin-bottom:8px; }
+  .ended-box span { color:var(--muted); font-size:16px; }
+  html.ended #retell, html.ended .panel .note, html.ended .tries { display:none; }
+  html.ended .ended-box { display:block; }
+  html.ended .badge { color:var(--muted); background:var(--line); }
+  html.ended .dot { display:none; }
+</style>
+<script>
+/* Demo limits (Nick, 2026-11-26): open for 7 days, 3 call/chat starts per browser. */
+(function () {
+  var EXPIRES = Date.parse("2026-12-04T00:00:00Z"), KEY = "sam_tries_skin-heal-708885", MAX = 3;
+  var MSG_EXPIRED = ["This demo has expired.", "Message me on Upwork and I'll set up a fresh one for you."];
+  var MSG_USED = ["You've used all 3 tries of this demo.", "Message me on Upwork to see it live on your own leads."];
+  function used() { try { return +localStorage.getItem(KEY) || 0; } catch (e) { return 0; } }
+  function bump() { try { localStorage.setItem(KEY, used() + 1); } catch (e) {} }
+  function end(m) {
+    document.documentElement.classList.add("ended");
+    var go = function () {
+      var b = document.getElementById("ended-msg");
+      if (b) b.innerHTML = "<b>" + m[0] + "</b><span>" + m[1] + "</span>";
+      var s = document.querySelector(".badge"); if (s) s.lastChild.textContent = " Demo closed";
+    };
+    document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", go) : go();
+  }
+  var blocked = Date.now() >= EXPIRES ? MSG_EXPIRED : (used() >= MAX ? MSG_USED : null);
+  window.__samOpen = !blocked;
+  if (blocked) { end(blocked); return; }
+  /* Count each new call or chat the widget starts; refuse once the tries are used up. */
+  var realFetch = window.fetch.bind(window);
+  window.fetch = function (input, init) {
+    var url = typeof input === "string" ? input : (input && input.url) || "";
+    if (/create-web-call|\/create-chat(?![-\w])/.test(url)) {
+      if (Date.now() >= EXPIRES) { end(MSG_EXPIRED); return Promise.reject(new Error("demo expired")); }
+      if (used() >= MAX) { end(MSG_USED); return Promise.reject(new Error("demo tries used")); }
+      bump();
+    }
+    return realFetch(input, init);
+  };
+})();
+</script>
+</head>
+<body>
+<main class="wrap">
+  <section class="hero">
+    <span class="badge"><span class="dot"></span> Live now · 24/7</span>
+    <p class="for">Built for Skin & Heal</p>
+    <h1>Meet Sam, Skin & Heal's AI appointment setter.</h1>
+    <p class="sub">Sam calls every new lead within 60 seconds, answers their questions and books the paid consultation. Try it as one of your leads. Two minutes, no sign-up.</p>
+  </section>
+  <section class="steps">
+    <ol>
+      <li><div><b>Call or chat</b><span>Press call (allow the microphone), or type to try it by text.</span></div></li>
+      <li><div><b>Be a new lead</b><span>You just asked Skin & Heal about help with their skin, like acne or pigmentation from one of our ads.</span></div></li>
+      <li><div><b>Let Sam book you</b><span>Ask questions, push back, say you're busy. Sam handles it like your best setter.</span></div></li>
+    </ol>
+    <p class="tries">Things to try:<br>
+      <code>"Why do I have to pay 30 pounds for a consultation?"</code><code>"How much are the packages?"</code><code>"I've tried everything and nothing works"</code><code>"Can you call me back later?"</code><code>Interrupt it mid-sentence</code>
+    </p>
+  </section>
+  <section class="panel">
+    <div id="retell"
+      data-retell-widget="true"
+      data-voice-public-key="public_key_3481666dc893daca3e68d"
+      data-voice-agent-id="agent_17462181d1e17c6c03c8c6a1f3"
+      data-public-key="public_key_3481666dc893daca3e68d"
+      data-agent-id="agent_18672cbb01fe2c001ae01582dd"
+      data-title="Sam · Skin & Heal"
+      data-bot-name="Sam"
+      data-color="#14171f"></div>
+    <div class="ended-box" id="ended-msg"></div>
+    <p class="note">Demo only. Prices and details are examples. Calls end after 3 minutes. Open for 7 days.</p>
+  </section>
+</main>
+<script>
+  if (window.__samOpen) {
+    var s = document.createElement("script");
+    s.src = "https://dashboard.retellai.com/retell-widget-embed.js";
+    document.body.appendChild(s);
+  }
+</script>
+</body>
+</html>
