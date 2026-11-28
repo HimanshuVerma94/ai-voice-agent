@@ -42,9 +42,9 @@
 <script>
 /* Demo limits (Nick, 2026-11-26): open for 7 days, 3 call/chat starts per browser. */
 (function () {
-  var EXPIRES = Date.parse("2026-12-05T00:00:00Z"), KEY = "sam_tries_wishbone-athletics", MAX = 3;
+  var EXPIRES = Date.parse("2026-12-05T00:00:00Z"), KEY = "tries10_wishbone-athletics", MAX = 10;
   var MSG_EXPIRED = ["This demo has expired.", "Message me on Upwork and I'll set up a fresh one for you."];
-  var MSG_USED = ["You've used all 3 tries of this demo.", "Message me on Upwork to see it live on your own leads."];
+  var MSG_USED = ["You've used all 10 tries of this demo.", "Message me on Upwork to see it live on your own leads."];
   function used() { try { return +localStorage.getItem(KEY) || 0; } catch (e) { return 0; } }
   function bump() { try { localStorage.setItem(KEY, used() + 1); } catch (e) {} }
   function end(m) {
